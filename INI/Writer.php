@@ -41,13 +41,21 @@ class Writer extends AbstractWriter
     {
         $this->previous_contents = "";
         if (file_exists($file_name))
+        {
             $this->previous_contents = file_get_contents($file_name);
+        }
+        else
+        {
+            touch($file_name);
+            Hook::execute("WASP.IO.FileCreated", ['filename' => $file_name]);
+        }
 
         $file_handle = fopen($file_name, "w");
         if (!$file_handle)
             throw new IOException("Could not open $file_name for writing");
         $this->format($data, $file_handle);
         $bytes = ftell($file_handle);
+        fclose($file_handle);
         return $bytes;
     }
 

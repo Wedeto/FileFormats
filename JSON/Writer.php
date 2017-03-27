@@ -54,7 +54,7 @@ class Writer extends AbstractWriter
      * Set a JSONP callback function
      *
      * @param string $callback The callback function
-     * @return WASP\IO\DataWriter\JSONWriter Provides fluent interface
+     * @return WASP\FileFormats\JSON\Writer Provides fluent interface
      */
     public function setCallback(string $callback)
     {
@@ -71,9 +71,9 @@ class Writer extends AbstractWriter
     }
 
     /**
-     * Encode the specified object, catching UTF8 errors.
+     * Encode the specified entity, catching UTF8 errors.
      *
-     * @param JSONSerializable $obj The data to output
+     * @param mixed $obj The data to output
      * @param resource $buf The buffer to write to. If this is specified, nothing is returned.
      * @return string The JSON encoded data if no buffer was specified.
      */
