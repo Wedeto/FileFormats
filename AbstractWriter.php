@@ -28,7 +28,7 @@ namespace WASP\FileFormats;
 use WASP\Util\Functions as WF;
 use WASP\Util\Hook;
 
-abstract class Writer
+abstract class AbstractWriter
 {
     protected $pretty_print;
 
