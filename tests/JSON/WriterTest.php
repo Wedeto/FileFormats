@@ -27,6 +27,8 @@ namespace Wedeto\FileFormats\JSON;
 
 use PHPUnit\Framework\TestCase;
 
+use Wedeto\Util\Dictionary;
+
 /**
  * @covers Wedeto\FileFormats\JSON\Writer
  */
@@ -108,11 +110,10 @@ EOT;
      */
     public function testSerializableException()
     {
-        $obj = new \StdClass;
-        $obj->test = 1;
+        $obj = new JSONTestUnwritableStub;
 
-        $this->expectException(\RuntimeException::class);
         $json = Writer::pprintJSON($obj);
+        $this->assertEquals('{}', $json);
     }
 
     /**
@@ -137,3 +138,6 @@ EOT;
         $this->assertEquals($pprint, $json);
     }
 };
+
+class JSONTestUnwritableStub
+{}

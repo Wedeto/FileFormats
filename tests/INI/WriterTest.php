@@ -25,28 +25,26 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace Wedeto\FileFormats\INI;
 
-use Wedeto\Platform\System;
-use Wedeto\IO\Path;
+
 use PHPUnit\Framework\TestCase;
 
+use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamWrapper;
+use org\bovigo\vfs\vfsStreamDirectory;
+
+use Wedeto\IO\Path;
 /**
  * @covers Wedeto\FileFormats\INI\Writer
  */
 class WriterTest extends TestCase
 {
-    private $path;
+    private $dir;
 
     public function setUp()
     {
-        $path = System::path(); 
-        Path::setRequiredPrefix($path->root);
-        $this->path = $path->var . '/test';
-        Path::mkdir($this->path);
-    }
-
-    public function tearDown()
-    {
-        Path::rmtree($this->path);
+        vfsStreamWrapper::register();
+        vfsStreamWrapper::setRoot(new vfsStreamDirectory('testdir'));
+        $this->dir = vfsStream::url('testdir');
     }
 
     /**
@@ -56,7 +54,7 @@ class WriterTest extends TestCase
     public function testIniWriterException()
     {
         $cfg = array('sec1' => array('nest1' => array('nest2' => array('nest3' => 1))));
-        $file = $this->path . '/test.ini';
+        $file = $this->dir . '/test.ini';
         $this->expectException(\DomainException::class);
 
         $writer = new Writer();
@@ -90,7 +88,7 @@ class WriterTest extends TestCase
             )
         );
 
-        $file = $this->path . '/test.ini';
+        $file = $this->dir . '/test.ini';
         $writer = new Writer();
         $writer->rewrite($cfg, $file);
 
@@ -163,7 +161,7 @@ var4 = "value4"
 var5 = "value5"
 
 EOT;
-        $file = $this->path . '/test.ini';
+        $file = $this->dir . '/test.ini';
         file_put_contents($file, $ini);
 
         // Read contents

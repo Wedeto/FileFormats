@@ -25,6 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace Wedeto\FileFormats\INI;
 
+use Wedeto\Util\Hook;
 use Wedeto\Util\Functions as WF;
 use Wedeto\FileFormats\AbstractWriter;
 

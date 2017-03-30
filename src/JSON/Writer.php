@@ -120,7 +120,14 @@ class Writer extends AbstractWriter
     public static function pprintJSON($obj, $indent = 0, $json_array = null, $buf = null)
     {
         if (is_object($obj) && method_exists($obj, "jsonSerialize"))
+        {
             $obj = $obj->jsonSerialize();
+        }
+        elseif ($obj instanceof \Traversable)
+        {
+            $it = new ArrayIterator($obj);
+            $obj = $it->getArrayCode();
+        }
 
         if (!WF::is_array_like($obj))
             return self::writeJSON($obj, $buf);
