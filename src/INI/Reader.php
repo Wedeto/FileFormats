@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, the WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,10 +23,10 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\FileFormats\INI;
+namespace Wedeto\FileFormats\INI;
 
-use WASP\IO\IOException;
-use WASP\FileFormats\AbstractReader;
+use Wedeto\IO\IOException;
+use Wedeto\FileFormats\AbstractReader;
 
 class Reader extends AbstractReader
 {

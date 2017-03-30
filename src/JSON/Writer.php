@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, the WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,11 +23,11 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\FileFormats\JSON;
+namespace Wedeto\FileFormats\JSON;
 
-use WASP\Util\Encoding;
-use WASP\Util\Functions as WF;
-use WASP\FileFormats\AbstractWriter;
+use Wedeto\Util\Encoding;
+use Wedeto\Util\Functions as WF;
+use Wedeto\FileFormats\AbstractWriter;
 
 class Writer extends AbstractWriter
 {
@@ -54,7 +54,7 @@ class Writer extends AbstractWriter
      * Set a JSONP callback function
      *
      * @param string $callback The callback function
-     * @return WASP\FileFormats\JSON\Writer Provides fluent interface
+     * @return Wedeto\FileFormats\JSON\Writer Provides fluent interface
      */
     public function setCallback(string $callback)
     {

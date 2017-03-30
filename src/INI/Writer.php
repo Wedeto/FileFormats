@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, the WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,10 +23,10 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\FileFormats\INI;
+namespace Wedeto\FileFormats\INI;
 
-use WASP\Util\Functions as WF;
-use WASP\FileFormats\AbstractWriter;
+use Wedeto\Util\Functions as WF;
+use Wedeto\FileFormats\AbstractWriter;
 
 /**
  * The INI-file class writes INI-files. If the INI-file exists,
@@ -47,7 +47,7 @@ class Writer extends AbstractWriter
         else
         {
             touch($file_name);
-            Hook::execute("WASP.IO.FileCreated", ['filename' => $file_name]);
+            Hook::execute("Wedeto.IO.FileCreated", ['filename' => $file_name]);
         }
 
         $file_handle = fopen($file_name, "w");

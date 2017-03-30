@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, the WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,14 +23,14 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\FileFormats\INI;
+namespace Wedeto\FileFormats\INI;
 
-use WASP\Platform\System;
-use WASP\IO\Path;
+use Wedeto\Platform\System;
+use Wedeto\IO\Path;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers WASP\FileFormats\INI\Writer
+ * @covers Wedeto\FileFormats\INI\Writer
  */
 class WriterTest extends TestCase
 {
@@ -50,8 +50,8 @@ class WriterTest extends TestCase
     }
 
     /**
-     * @covers WASP\FileFormats\INI\Writer::format
-     * @covers WASP\FileFormats\INI\Writer::writeParameter
+     * @covers Wedeto\FileFormats\INI\Writer::format
+     * @covers Wedeto\FileFormats\INI\Writer::writeParameter
      */
     public function testIniWriterException()
     {
@@ -64,8 +64,8 @@ class WriterTest extends TestCase
     }
 
     /**
-     * @covers WASP\FileFormats\INI\Writer::write
-     * @covers WASP\FileFormats\INI\Writer::writeParameter
+     * @covers Wedeto\FileFormats\INI\Writer::write
+     * @covers Wedeto\FileFormats\INI\Writer::writeParameter
      */
     public function testIniWriterHierarchical()
     {
@@ -121,8 +121,8 @@ EOT;
     }
 
     /**
-     * @covers WASP\FileFormats\INI\Writer::write
-     * @covers WASP\FileFormats\INI\Writer::writeParameter
+     * @covers Wedeto\FileFormats\INI\Writer::write
+     * @covers Wedeto\FileFormats\INI\Writer::writeParameter
      */
     public function testIniWriterComments()
     {

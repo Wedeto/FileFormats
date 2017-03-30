@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, the WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,22 +23,22 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\FileFormats\JSON;
+namespace Wedeto\FileFormats\JSON;
 
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers WASP\FileFormats\JSON\Writer
+ * @covers Wedeto\FileFormats\JSON\Writer
  */
 final class WriterTest extends TestCase
 {
     /**
-     * @covers WASP\FileFormats\JSON\Writer::init
-     * @covers WASP\FileFormats\JSON\Writer::add
-     * @covers WASP\FileFormats\JSON\Writer::get
-     * @covers WASP\FileFormats\JSON\Writer::remove
-     * @covers WASP\FileFormats\JSON\Writer::setPrettyPrinting
-     * @covers WASP\FileFormats\JSON\Writer::setCallback
+     * @covers Wedeto\FileFormats\JSON\Writer::init
+     * @covers Wedeto\FileFormats\JSON\Writer::add
+     * @covers Wedeto\FileFormats\JSON\Writer::get
+     * @covers Wedeto\FileFormats\JSON\Writer::remove
+     * @covers Wedeto\FileFormats\JSON\Writer::setPrettyPrinting
+     * @covers Wedeto\FileFormats\JSON\Writer::setCallback
      */
     public function testJSON()
     {
@@ -92,7 +92,7 @@ EOT;
     }
 
     /** 
-     * @covers WASP\FileFormats\JSON\Writer::pprintJSON
+     * @covers Wedeto\FileFormats\JSON\Writer::pprintJSON
      */
     public function testSerializable()
     {
@@ -104,7 +104,7 @@ EOT;
     }
 
     /** 
-     * @covers WASP\FileFormats\JSON\Writer::pprintJSON
+     * @covers Wedeto\FileFormats\JSON\Writer::pprintJSON
      */
     public function testSerializableException()
     {
@@ -116,7 +116,7 @@ EOT;
     }
 
     /**
-     * @covers WASP\FileFormats\JSON\Writer::pprintJSON
+     * @covers Wedeto\FileFormats\JSON\Writer::pprintJSON
      */
     public function testJsonIsArray()
     {

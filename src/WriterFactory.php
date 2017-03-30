@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, the WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,9 +23,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\FileFormats;
+namespace Wedeto\FileFormats;
 
-use WASP\Util\Hook;
+use Wedeto\Util\Hook;
 
 class WriterFactory
 {
@@ -38,7 +38,7 @@ class WriterFactory
         $ext = strtolower(substr($file_name, $ext_pos + 1));
 
         $result = Hook::execute(
-            "WASP.FileFormats.CreateWriter",
+            "Wedeto.FileFormats.CreateWriter",
             ["writer" => null, "filename" => $file_name, "ext" => $ext]
         );
 
@@ -74,7 +74,7 @@ class WriterFactory
             'application/xml' => XML\Writer::class,
         );
 
-        $result = Hook::execute('WASP.FileFormats.GetWriterTypes', ['types' => $writers]);
+        $result = Hook::execute('Wedeto.FileFormats.GetWriterTypes', ['types' => $writers]);
         return $result['types'] ?: $writers;
     }
 }
