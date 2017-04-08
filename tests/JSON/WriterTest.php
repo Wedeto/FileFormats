@@ -34,14 +34,6 @@ use Wedeto\Util\Dictionary;
  */
 final class WriterTest extends TestCase
 {
-    /**
-     * @covers Wedeto\FileFormats\JSON\Writer::init
-     * @covers Wedeto\FileFormats\JSON\Writer::add
-     * @covers Wedeto\FileFormats\JSON\Writer::get
-     * @covers Wedeto\FileFormats\JSON\Writer::remove
-     * @covers Wedeto\FileFormats\JSON\Writer::setPrettyPrinting
-     * @covers Wedeto\FileFormats\JSON\Writer::setCallback
-     */
     public function testJSON()
     {
         $data = array(
@@ -98,7 +90,7 @@ EOT;
      */
     public function testSerializable()
     {
-        $dict = new Dictionary(); // A JsonSerializable class
+        $dict = new Dictionary(); // A JSONSerializable class
         $dict['test'] = 1;
 
         $json = Writer::pprintJSON($dict);
@@ -108,18 +100,19 @@ EOT;
     /** 
      * @covers Wedeto\FileFormats\JSON\Writer::pprintJSON
      */
-    public function testSerializableException()
+    public function testJSONPPrintOtherObject()
     {
-        $obj = new JSONTestUnwritableStub;
+        $json = Writer::pprintJSON(new JSONTestUnwritableStub);
+        $this->assertEquals("{}", $json);
 
-        $json = Writer::pprintJSON($obj);
-        $this->assertEquals('{}', $json);
+        $json = Writer::pprintJSON(new JSONTestUnwritableStubWithContents);
+        $this->assertEquals("{\n    \"foo\": \"bar\",\n    \"baz\": true\n}", $json);
     }
 
     /**
      * @covers Wedeto\FileFormats\JSON\Writer::pprintJSON
      */
-    public function testJsonIsArray()
+    public function testJSONIsArray()
     {
         $a = array(1, 2, 3, 4, 5, 6, 7);
         $json = Writer::pprintJSON($a, 0, true, null);
@@ -137,7 +130,52 @@ EOT;
 EOT;
         $this->assertEquals($pprint, $json);
     }
+
+    public function testJSONCallback()
+    {
+        $writer = new Writer;
+        $this->assertEquals('application/json', $writer->getMimeType());
+        $writer->setCallback('testfunc');
+        $this->assertEquals('application/javascript', $writer->getMimeType());
+    
+        $fh = fopen('php://memory', 'rw');
+        $writer->format(['foo' => 'bar'], $fh);
+        rewind($fh);
+        $json = stream_get_contents($fh);
+        fclose($fh);
+
+        $this->assertEquals('testfunc({"foo":"bar"});', $json);
+
+        $fh = fopen('php://memory', 'rw');
+        $writer->setPrettyPrint(true);
+        $writer->format(['foo' => 'bar'], $fh);
+        rewind($fh);
+        $json = stream_get_contents($fh);
+        fclose($fh);
+
+        $expected = <<<CODE
+testfunc({
+    "foo": "bar"
+});
+CODE;
+        $this->assertEquals($expected, $json);
+    }
+
+    public function testPPrintScalars()
+    {
+        $writer = new Writer;
+        $this->assertEquals('3', $writer->pprintJSON(3));
+        $this->assertEquals('3.5', $writer->pprintJSON(3.5));
+        $this->assertEquals('true', $writer->pprintJSON(true));
+        $this->assertEquals('null', $writer->pprintJSON(null));
+    }
 };
 
 class JSONTestUnwritableStub
 {}
+
+class JSONTestUnwritableStubWithContents
+{
+    public $foo = 'bar';
+    public $baz = true;
+}

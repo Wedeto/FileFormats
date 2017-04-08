@@ -27,6 +27,7 @@ namespace Wedeto\FileFormats\PHPS;
 
 use ErrorException;
 
+use Wedeto\Util\ErrorInterceptor;
 use Wedeto\IO\IOException;
 use Wedeto\FileFormats\AbstractReader;
 
@@ -52,13 +53,17 @@ class Reader extends AbstractReader
 
     public function readString(string $data)
     {
-        try
-        {
+        $interceptor = new ErrorInterceptor(function ($data) {
             return unserialize($data);
-        }
-        catch (ErrorException $e)
-        {
-            throw new IOException($e);
-        }
+        });
+
+        $interceptor->registerError(E_NOTICE, "unserialize");
+        
+        $result = $interceptor->execute($data);
+
+        foreach ($interceptor->getInterceptedErrors() as $error)
+            throw new IOException("Failed to read PHP Serialized data", $error->getCode(), $error);
+        
+        return $result;
     }
 }

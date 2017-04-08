@@ -32,7 +32,7 @@ class Reader extends AbstractReader
 {
     public function readFile(string $file_name)
     {
-        $contents = file_get_contents($file_name);
+        $contents = @file_get_contents($file_name);
         if ($contents === false)
             throw new IOException("Failed to read file $file_name");
 

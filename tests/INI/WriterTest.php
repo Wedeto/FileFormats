@@ -33,6 +33,8 @@ use org\bovigo\vfs\vfsStreamWrapper;
 use org\bovigo\vfs\vfsStreamDirectory;
 
 use Wedeto\IO\Path;
+use Wedeto\IO\IOException;
+
 /**
  * @covers Wedeto\FileFormats\INI\Writer
  */
@@ -178,5 +180,29 @@ EOT;
 
         $ini_out = file_get_contents($file);
         $this->assertEquals($ini_out, $ini_expected);
+    }
+
+    public function testRewriteUnwritable()
+    {
+        $file = $this->dir . '/test.ini';
+
+        $ini = <<<EOT
+[sec1]
+var = "val"
+EOT;
+        file_put_contents($file, $ini);
+        chmod($file, 0400);
+
+        $data = [
+            'sec1' => [
+                'var' => 'val',
+                'var2' => 'val2'
+            ]
+        ];
+
+        $writer = new Writer;
+        $this->expectException(IOException::class);
+        $this->expectExceptionMessage("Could not open {$file} for writing");
+        $writer->rewrite($data, $file);
     }
 }

@@ -28,6 +28,7 @@ namespace Wedeto\FileFormats\INI;
 use Wedeto\Util\Hook;
 use Wedeto\Util\Functions as WF;
 use Wedeto\FileFormats\AbstractWriter;
+use Wedeto\IO\IOException;
 
 /**
  * The INI-file class writes INI-files. If the INI-file exists,
@@ -40,23 +41,32 @@ class Writer extends AbstractWriter
 
     public function rewrite($data, $file_name)
     {
-        $this->previous_contents = "";
-        if (file_exists($file_name))
+        try
         {
-            $this->previous_contents = file_get_contents($file_name);
-        }
-        else
-        {
-            touch($file_name);
-            Hook::execute("Wedeto.IO.FileCreated", ['filename' => $file_name]);
-        }
+            $this->previous_contents = "";
+            if (file_exists($file_name))
+            {
+                $this->previous_contents = file_get_contents($file_name);
+            }
+            else
+            {
+                touch($file_name);
+                Hook::execute("Wedeto.IO.FileCreated", ['path' => $file_name]);
+            }
 
-        $file_handle = fopen($file_name, "w");
-        if (!$file_handle)
-            throw new IOException("Could not open $file_name for writing");
-        $this->format($data, $file_handle);
-        $bytes = ftell($file_handle);
-        fclose($file_handle);
+            $file_handle = @fopen($file_name, "w");
+            if (!is_resource($file_handle))
+                throw new IOException("Could not open $file_name for writing");
+            $this->format($data, $file_handle);
+            $bytes = ftell($file_handle);
+            fclose($file_handle);
+        }
+        finally
+        {
+            // Always erase the previous contents, or it may
+            // interfere with a new call to format()
+            $this->previous_contents = null;
+        }
         return $bytes;
     }
 

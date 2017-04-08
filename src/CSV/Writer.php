@@ -25,7 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace Wedeto\FileFormats\CSV;
 
-use Wedeto\Util\Function as WF;
+use Wedeto\Util\Functions as WF;
 use Wedeto\FileFormats\AbstractWriter;
 
 class Writer extends AbstractWriter

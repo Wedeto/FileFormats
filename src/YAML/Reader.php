@@ -29,20 +29,18 @@ use ErrorException;
 
 use Wedeto\FileFormats\AbstractReader;
 use Wedeto\Util\Functions as WF;
+use Wedeto\Util\ErrorInterceptor;
 use Wedeto\IO\IOException;
 
 class Reader extends AbstractReader
 {
     public function readFile(string $file_name)
     {
-        try
-        {
-            return yaml_parse_file($file_name);
-        }
-        catch (ErrorException $e)
-        {
-            throw new IOException($e);
-        }
+        // yaml_read_file does not support stream wrappers
+        $file_handle = @fopen($file_name, "r");
+        if (!is_resource($file_handle))
+            throw new IOException("Failed to read file: " . $file_name);
+        return $this->readFileHandle($file_handle);
     }
 
     public function readFileHandle($file_handle)
@@ -59,15 +57,21 @@ class Reader extends AbstractReader
 
     public function readString(string $data)
     {
-        try
-        {
+        $interceptor = new ErrorInterceptor(function ($data) {
             return yaml_parse($data);
-        }
-        catch (ErrorException $e)
-        {
-            throw new IOException($e);
-        }
+        });
+
+        $interceptor->registerError(E_WARNING, "yaml_parse");
+        
+        $result = $interceptor->execute($data);
+
+        foreach ($interceptor->getInterceptedErrors() as $error)
+            throw new IOException("Failed to read YAML data", $error->getCode(), $error);
+
+        return $result;
     }
 }
 
+// @codeCoverageIgnoreStart
 WF::check_extension('yaml', null, 'yaml_parse');
+// @codeCoverageIgnoreEnd

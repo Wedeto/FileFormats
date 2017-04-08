@@ -119,18 +119,20 @@ class Writer extends AbstractWriter
      */
     public static function pprintJSON($obj, $indent = 0, $json_array = null, $buf = null)
     {
-        if (is_object($obj) && method_exists($obj, "jsonSerialize"))
+        if (!is_object($obj) && !is_array($obj))
+            return self::writeJSON($obj, $buf);
+
+        // Make sure objects are traversable, or otherwise convert it to array
+        if (method_exists($obj, "jsonSerialize"))
         {
             $obj = $obj->jsonSerialize();
         }
-        elseif ($obj instanceof \Traversable)
+        elseif (!WF::is_array_like($obj))
         {
-            $it = new ArrayIterator($obj);
-            $obj = $it->getArrayCode();
+            // Extract properties and mark as non-array
+            $obj = get_object_vars($obj);
+            $json_array = false;
         }
-
-        if (!WF::is_array_like($obj))
-            return self::writeJSON($obj, $buf);
 
         if ($json_array === null)
             $array = WF::is_numeric_array($obj);
@@ -146,36 +148,41 @@ class Writer extends AbstractWriter
         }
 
         // Write opening bracket
-        fwrite($buf, $array ? "[\n" : "{\n");
-
-        // Write properties
-        $indent += 4;
-        $tot = count($obj);
-        $cur = 0;
-        foreach ($obj as $key => $sub)
+        if (count($obj) > 0)
         {
-            // Keys need to be string, otherwise they will not be quoted
-            if (is_numeric($key) && !$array)
-                $key = (string)$key;
+            fwrite($buf, $array ? "[\n" : "{\n");
 
-            $ending = (++$cur < $tot ? ",\n" : "\n");
-            fwrite($buf, str_repeat(' ', $indent));
-            if (!$array)
+            // Write properties
+            $indent += 4;
+            $tot = count($obj);
+            $cur = 0;
+            foreach ($obj as $key => $sub)
             {
-                self::writeJSON($key, $buf);
-                fwrite($buf, ': ');
-            } 
+                // Keys need to be string, otherwise they will not be quoted
+                if (is_numeric($key) && !$array)
+                    $key = (string)$key;
 
-            if (WF::is_array_like($sub) || is_object($sub))
-                self::pprintJSON($sub, $indent, null, $buf);
-            else
-                self::writeJSON($sub, $buf);
+                $ending = (++$cur < $tot ? ",\n" : "\n");
+                fwrite($buf, str_repeat(' ', $indent));
+                if (!$array)
+                {
+                    self::writeJSON($key, $buf);
+                    fwrite($buf, ': ');
+                } 
 
-            fwrite($buf, $ending);
+                if (WF::is_array_like($sub) || is_object($sub))
+                    self::pprintJSON($sub, $indent, null, $buf);
+                else
+                    self::writeJSON($sub, $buf);
+
+                fwrite($buf, $ending);
+            }
+
+            // Write closing bracket
+            fwrite($buf, str_repeat(' ', $indent - 4) . ($array ? ']' : '}'));
         }
-
-        // Write closing bracket
-        fwrite($buf, str_repeat(' ', $indent - 4) . ($array ? ']' : '}'));
+        else
+            fwrite($buf, $array ? "[]" : "{}");
 
         if (!$return_buf)
             return;

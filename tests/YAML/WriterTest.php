@@ -25,18 +25,49 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace Wedeto\FileFormats\YAML;
 
-use Wedeto\FileFormats\AbstractWriter;
-use Wedeto\Util\Functions as WF;
+use PHPUnit\Framework\TestCase;
 
-class Writer extends AbstractWriter
+use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamWrapper;
+use org\bovigo\vfs\vfsStreamDirectory;
+
+use Wedeto\IO\Path;
+use Wedeto\IO\IOException;
+
+/**
+ * @covers Wedeto\FileFormats\YAML\Writer
+ */
+class WriterTest extends TestCase
 {
-    public function format($data, $file_handle)
+    private $dir;
+
+    public function setUp()
     {
-        // YAML is always 'pretty printed' as it relies on indentation and whitespace
-        return fwrite($file_handle, yaml_emit($data));
+        vfsStreamWrapper::register();
+        vfsStreamWrapper::setRoot(new vfsStreamDirectory('testdir'));
+        $this->dir = vfsStream::url('testdir');
+    }
+
+    /**
+     * @covers Wedeto\FileFormats\INI\Writer::format
+     * @covers Wedeto\FileFormats\INI\Writer::writeParameter
+     */
+    public function testYAMLWriter()
+    {
+        if (!function_exists('yaml_emit'))
+            return;
+
+        $cfg = array('sec1' => array('nest1' => array('nest2' => array('nest3' => 1))));
+        $file = $this->dir . '/test.yaml';
+
+        $fh = fopen($file, "w");
+        $writer = new Writer();
+        $writer->format($cfg, $fh);
+        fclose($fh);
+
+        $expected = yaml_emit($cfg);
+        $actual = file_get_contents($file);
+
+        $this->assertEquals($expected, $actual);
     }
 }
-
-// @codeCoverageIgnoreStart
-WF::check_extension('yaml', null, 'yaml_emit');
-// @codeCoverageIgnoreEnd

@@ -23,32 +23,53 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace Wedeto\FileFormats\INI;
+namespace Wedeto\FileFormats\XML;
 
+use PHPUnit\Framework\TestCase;
+
+use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamWrapper;
+use org\bovigo\vfs\vfsStreamDirectory;
+
+use Wedeto\IO\Path;
 use Wedeto\IO\IOException;
-use Wedeto\FileFormats\AbstractReader;
 
-class Reader extends AbstractReader
+/**
+ * @covers Wedeto\FileFormats\XML\Writer
+ */
+class WriterTest extends TestCase
 {
-    public function readFile(string $file_name)
+    private $dir;
+
+    public function setUp()
     {
-        return parse_ini_file($file_name, true, INI_SCANNER_TYPED);
+        vfsStreamWrapper::register();
+        vfsStreamWrapper::setRoot(new vfsStreamDirectory('testdir'));
+        $this->dir = vfsStream::url('testdir');
     }
 
-    public function readFileHandle($file_handle)
+    /**
+     * @covers Wedeto\FileFormats\INI\Writer::format
+     * @covers Wedeto\FileFormats\INI\Writer::writeParameter
+     */
+    public function testXMLWriter()
     {
-        if (!is_resource($file_handle))
-            throw new \InvalidArgumentException("No file handle was provided");
+        $cfg = array('sec1' => array('nest1' => array('nest2' => array('nest3' => 1))));
+        $file = $this->dir . '/test.xml';
 
-        $contents = "";
-        while (!feof($file_handle))
-            $contents .= fread($file_handle, 8192);
+        $fh = fopen($file, "w");
+        $writer = new Writer();
+        $writer->setRootNode('foobar');
+        $writer->write($cfg, $fh);
+        fclose($fh);
 
-        return $this->readString($contents);
-    }
+        $expected = <<<XML
+<?xml version="1.0"?>
+<foobar><sec1><nest1><nest2><nest3>1</nest3></nest2></nest1></sec1></foobar>
 
-    public function readString(string $data)
-    {
-        return parse_ini_string($data, true, INI_SCANNER_TYPED);
+XML;
+        $actual = file_get_contents($file);
+
+        $this->assertEquals($expected, $actual);
     }
 }

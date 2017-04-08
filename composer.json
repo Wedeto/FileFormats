@@ -5,7 +5,8 @@
     "homepage": "https://wedeto.com/",
     "type": "library",
     "require": {
-        "Wedeto/Util": "@dev",
+        "Wedeto/Util": "0.9.*",
+        "Wedeto/IO": "0.9.*",
         "php": ">=7.0.0"
     },
     "require-dev": {
@@ -20,12 +21,6 @@
         {
             "name": "Egbert van der Wal",
             "email": "ewal@pointpro.nl"
-        }
-    ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/Wedeto/Util"
         }
     ]
 }

@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\FileFormats\XML;
 
 use XMLReader;
+use JSONSerializable;
 
 use Wedeto\FileFormats\AbstractReader;
 use Wedeto\IO\IOException;

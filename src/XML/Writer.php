@@ -25,6 +25,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace Wedeto\FileFormats\XML;
 
+use XMLWriter;
+
 use Wedeto\Util\Functions as WF;
 use Wedeto\FileFormats\AbstractWriter;
 
@@ -45,12 +47,13 @@ class Writer extends AbstractWriter
 
     protected function format($data, $file_handle)
     {
-        $writer = \XMLWriter::openMemory();
+        $writer = new XMLWriter;
+        $writer->openMemory();
         $writer->startDocument();
 
-        $this->startElement($this->root_node);
-        $this->writeXMLRecursive($writer, $data);
-        $this->endElement();
+        $writer->startElement($this->root_node);
+        $this->formatRecursive($writer, $data);
+        $writer->endElement();
         
         $writer->endDocument();
         fwrite($file_handle, $writer->outputMemory());
@@ -70,7 +73,7 @@ class Writer extends AbstractWriter
                 if (is_array($value))
                     $this->formatRecursive($writer, $value);
                 else
-                    $this->text(WF::str($value));
+                    $writer->text(WF::str($value));
                 $writer->endElement();
             }
         }
