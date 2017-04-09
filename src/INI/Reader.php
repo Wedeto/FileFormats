@@ -35,18 +35,6 @@ class Reader extends AbstractReader
         return parse_ini_file($file_name, true, INI_SCANNER_TYPED);
     }
 
-    public function readFileHandle($file_handle)
-    {
-        if (!is_resource($file_handle))
-            throw new \InvalidArgumentException("No file handle was provided");
-
-        $contents = "";
-        while (!feof($file_handle))
-            $contents .= fread($file_handle, 8192);
-
-        return $this->readString($contents);
-    }
-
     public function readString(string $data)
     {
         return parse_ini_string($data, true, INI_SCANNER_TYPED);

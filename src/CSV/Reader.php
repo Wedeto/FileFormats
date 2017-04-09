@@ -89,9 +89,10 @@ class Reader extends AbstractReader implements Iterator
         return $this->escape_char;
     }
 
-    public function setReaderHeader(bool $read_header)
+    public function setReadHeader(bool $read_header)
     {
         $this->read_header = $read_header;
+        return $this;
     }
 
     public function getReadHeader()
@@ -126,8 +127,8 @@ class Reader extends AbstractReader implements Iterator
 
     public function readString(string $data)
     {
-        $buf = fopen('php://memory', 'rw');
-        fwrite($buf, $data);
+        $this->file_handle = fopen('php://memory', 'rw');
+        fwrite($this->file_handle, $data);
 
         $data = array();
         foreach ($this as $row)
@@ -138,7 +139,7 @@ class Reader extends AbstractReader implements Iterator
 
     public function rewind()
     {
-        fseek($this->file_handle, 0);
+        rewind($this->file_handle);
         $this->line_number = 0;
         $this->current_line = null;
         $this->header = null;
@@ -176,7 +177,7 @@ class Reader extends AbstractReader implements Iterator
     
     protected function readLine()
     {
-        if ($this->read_header && $this->line_number === 0 && $this->header === null)
+        if ($this->read_header && empty($this->line_number) && $this->header === null)
             $this->header = fgetcsv($this->file_handle, 0, $this->delimiter, $this->enclosure, $this->escape_char);
 
         $line = fgetcsv($this->file_handle, 0, $this->delimiter, $this->enclosure, $this->escape_char);

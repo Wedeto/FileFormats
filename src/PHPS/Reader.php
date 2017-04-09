@@ -33,24 +33,6 @@ use Wedeto\FileFormats\AbstractReader;
 
 class Reader extends AbstractReader
 {
-    public function readFile(string $file_name)
-    {
-        $file_handle = fopen($file_name , "r");
-        return $this->readFileHandle($file_handle);
-    }
-
-    public function readFileHandle($file_handle)
-    {
-        if (!is_resource($file_handle))
-            throw new \InvalidArgumentException("No file handle was provided");
-
-        $contents = "";
-        while (!feof($file_handle))
-            $contents .= fread($file_handle, 8192);
-
-        return $this->readString($contents);
-    }
-
     public function readString(string $data)
     {
         $interceptor = new ErrorInterceptor(function ($data) {

@@ -33,8 +33,6 @@ use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamWrapper;
 use org\bovigo\vfs\vfsStreamDirectory;
 
-use Wedeto\IO\Path;
-
 /**
  * @covers Wedeto\FileFormats\XML\Reader
  * @covers Wedeto\FileFormats\XML\XMLNode

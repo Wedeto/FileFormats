@@ -44,15 +44,6 @@ class Reader extends AbstractReader
         return $data;
     }
 
-    public function readFileHandle($file_handle)
-    {
-        if (!is_resource($file_handle))
-            throw new \InvalidArgumentException("No file handle was provided");
-
-        $contents = stream_get_contents($file_handle);
-        return $this->readString($contents);
-    }
-
     public function readString(string $data)
     {
         $reader = new XMLReader;

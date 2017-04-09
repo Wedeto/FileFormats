@@ -71,6 +71,7 @@ class Writer extends AbstractWriter
     public function setPrintHeader(bool $print_header)
     {
         $this->print_header = $print_header;
+        return $this;
     }
 
     public function getPrintHeader()
