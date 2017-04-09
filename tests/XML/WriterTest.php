@@ -48,28 +48,105 @@ class WriterTest extends TestCase
         $this->dir = vfsStream::url('testdir');
     }
 
-    /**
-     * @covers Wedeto\FileFormats\INI\Writer::format
-     * @covers Wedeto\FileFormats\INI\Writer::writeParameter
-     */
-    public function testXMLWriter()
+    public function testXMLWriterWritesNestedAndNumericArrays()
     {
-        $cfg = array('sec1' => array('nest1' => array('nest2' => array('nest3' => 1))));
+        $cfg = array('sec1' => array('nest1' => array('nest2' => array('nest3' => 1))), 'sec2' => [1, 2, 3, 4]);
         $file = $this->dir . '/test.xml';
 
         $fh = fopen($file, "w");
         $writer = new Writer();
         $writer->setRootNode('foobar');
+        $this->assertEquals('foobar', $writer->getRootNode());
         $writer->write($cfg, $fh);
         fclose($fh);
 
         $expected = <<<XML
 <?xml version="1.0"?>
-<foobar><sec1><nest1><nest2><nest3>1</nest3></nest2></nest1></sec1></foobar>
+<foobar><sec1><nest1><nest2><nest3>1</nest3></nest2></nest1></sec1><sec2>1</sec2><sec2>2</sec2><sec2>3</sec2><sec2>4</sec2></foobar>
 
 XML;
         $actual = file_get_contents($file);
 
         $this->assertEquals($expected, $actual);
+    }
+
+    public function testXMLWriterWritesNestedNumericArrays()
+    {
+        $cfg = array('arr1' => [['foo', 'bar'], ['baz', 'boo']]);
+        $file = $this->dir . '/test.xml';
+
+        $fh = fopen($file, "w");
+        $writer = new Writer();
+        $writer->setRootNode('bar');
+        $this->assertEquals('bar', $writer->getRootNode());
+        $writer->write($cfg, $fh);
+        fclose($fh);
+
+        $expected = <<<XML
+<?xml version="1.0"?>
+<bar><arr1><arr1>foo</arr1><arr1>bar</arr1></arr1><arr1><arr1>baz</arr1><arr1>boo</arr1></arr1></bar>
+
+XML;
+        $actual = file_get_contents($file);
+
+        $this->assertEquals($expected, $actual);
+
+        $cfg = array('arr1' => [['foo', 'bar'], ['baz', 'boo', ['foo', 'bar', 'baz', 'boo']]]);
+        $file = $this->dir . '/test.xml';
+
+        $fh = fopen($file, "w");
+        $writer = new Writer();
+        $writer->setRootNode('foo');
+        $this->assertEquals('foo', $writer->getRootNode());
+        $writer->write($cfg, $fh);
+        fclose($fh);
+
+        $expected = <<<XML
+<?xml version="1.0"?>
+<foo><arr1><arr1>foo</arr1><arr1>bar</arr1></arr1><arr1><arr1>baz</arr1><arr1>boo</arr1><arr1><arr1>foo</arr1><arr1>bar</arr1><arr1>baz</arr1><arr1>boo</arr1></arr1></arr1></foo>
+
+XML;
+        $actual = file_get_contents($file);
+
+        $this->assertEquals($expected, $actual);
+
+        $cfg = array('arr1' => [['foo', 'bar'], ['baz', 'boo', ['a' => 'foo', 'b' => 'bar', 'baz', 'boo']]]);
+        $file = $this->dir . '/test.xml';
+
+        $fh = fopen($file, "w");
+        $writer = new Writer();
+        $writer->setRootNode('foobar');
+        $this->assertEquals('foobar', $writer->getRootNode());
+        $writer->write($cfg, $fh);
+        fclose($fh);
+
+        $expected = <<<XML
+<?xml version="1.0"?>
+<foobar><arr1><arr1>foo</arr1><arr1>bar</arr1></arr1><arr1><arr1>baz</arr1><arr1>boo</arr1><arr1><a>foo</a><b>bar</b><arr1 index="0">baz</arr1><arr1 index="1">boo</arr1></arr1></arr1></foobar>
+
+XML;
+        $actual = file_get_contents($file);
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testXMLWriterWriteAttributes()
+    {
+        $cfg = array('arr1' => ['foo' => 'bar', 'baz' => 'boo', '_foobar' => 1]);
+        $file = $this->dir . '/test.xml';
+
+        $fh = fopen($file, "w");
+        $writer = new Writer();
+        $writer->setRootNode('bar');
+        $this->assertEquals('bar', $writer->getRootNode());
+        $writer->write($cfg, $fh);
+        fclose($fh);
+
+        $expected = <<<XML
+<?xml version="1.0"?>
+<bar><arr1 foobar="1"><foo>bar</foo><baz>boo</baz></arr1></bar>
+
+XML;
+        $actual = file_get_contents($file);
     }
 }

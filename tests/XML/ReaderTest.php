@@ -25,6 +25,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace Wedeto\FileFormats\XML;
 
+use LibXMLError;
+
 use PHPUnit\Framework\TestCase;
 
 use org\bovigo\vfs\vfsStream;
@@ -32,10 +34,11 @@ use org\bovigo\vfs\vfsStreamWrapper;
 use org\bovigo\vfs\vfsStreamDirectory;
 
 use Wedeto\IO\Path;
-use Wedeto\IO\IOException;
 
 /**
  * @covers Wedeto\FileFormats\XML\Reader
+ * @covers Wedeto\FileFormats\XML\XMLNode
+ * @covers Wedeto\FileFormats\XML\XMLException
  */
 class ReaderTest extends TestCase
 {
@@ -56,7 +59,7 @@ class ReaderTest extends TestCase
         $dt = $data['now'];
         $expected = <<<XML
 <?xml version="1.0"?>
-<foobar><foo>bar</foo><baz><0>1</0><1>2</1><2>3</2><now>$dt</now></foobar>
+<foobar><foo>bar</foo><baz>1</baz><baz>2</baz><baz>3</baz><now>$dt</now></foobar>
 XML;
 
         file_put_contents($this->file, $expected);
@@ -69,13 +72,22 @@ XML;
 
     public function testReadGarbage()
     {
-        return;
         $data = "GARBAGE";
 
         $reader = new Reader;
-        $this->expectException(IOException::class);
-        $this->expectExceptionMessage("Failed to read PHP Serialized data");
-        $actual = $reader->readString($data);
+        try
+        {
+            $actual = $reader->readString($data);
+        }
+        catch (XMLException $ex)
+        {
+            $this->assertContains("XMLReader error", $ex->getMessage());
+            $err = $ex->getError();
+            $this->assertInstanceOf(LibXMLError::class, $err);
+
+            $expected = trim($err->message);
+            $this->assertContains($expected, $ex->getMessage());
+        }
     }
 
     public function testReadInvalidFileHandle()
@@ -85,5 +97,47 @@ XML;
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("No file handle was provided");
         $actual = $reader->readFileHandle($fh);
+    }
+
+    public function testXMLReaderWriter()
+    {
+        $expected = ['foo' => 'bar', 'a' => [1, 2, 3], 'baz' => ['_type' => 'test', 'key' => 'value']];
+
+        $writer = new Writer;
+        $writer->write($expected, $this->file);
+
+        $reader = new Reader;
+        $actual = $reader->readFile($this->file);
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testXMLReaderWriterUsingString()
+    {
+        $expected = ['foo' => 'bar', 'a' => [1, 2, 3], 'baz' => ['_type' => 'test', 'key' => 'value']];
+
+        $writer = new Writer;
+        $xml_string = $writer->write($expected);
+
+        $reader = new Reader;
+        $actual = $reader->readString($xml_string);
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testXMLReaderWriterUsingFileHandle()
+    {
+        $expected = ['foo' => 'bar', 'a' => [1, 2, 3], 'baz' => ['_type' => 'test', 'key' => 'value']];
+
+        $writer = new Writer;
+        $fh = fopen($this->file, "w");
+        $writer->write($expected, $fh);
+        fclose($fh);
+
+        $fh = fopen($this->file, "r");
+        $reader = new Reader;
+        $actual = $reader->readFileHandle($fh);
+
+        $this->assertEquals($expected, $actual);
     }
 }

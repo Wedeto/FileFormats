@@ -49,10 +49,7 @@ class Reader extends AbstractReader
         if (!is_resource($file_handle))
             throw new \InvalidArgumentException("No file handle was provided");
 
-        $contents = "";
-        while (!feof($file_handle))
-            $contents .= fread($file_handle, 8192);
-
+        $contents = stream_get_contents($file_handle);
         return $this->readString($contents);
     }
 
@@ -71,14 +68,17 @@ class Reader extends AbstractReader
     {
         $data = array();
 
+        libxml_use_internal_errors(true);
         $root = new XMLNode;
         $cur = null;
 
+        $read_anything = false;
         while ($reader->read())
         {
+            $read_anything = true;
             if ($reader->nodeType === XMLReader::ELEMENT)
             {
-                if ($parent === null)
+                if ($cur === null)
                 {
                     $root->name = $reader->name;
                     $cur = $root;
@@ -87,7 +87,7 @@ class Reader extends AbstractReader
                 {
                     $node = new XMLNode;
                     $node->name = $reader->name;
-                    $node->parent = $parent;
+                    $node->parent = $cur;
                     $cur->children[] = $node;
                     $cur = $node;
                 }
@@ -115,8 +115,16 @@ class Reader extends AbstractReader
             }
         }
 
-        if ($cur !== null)
-            throw new \RuntimeException("Invalid XML");
+        try
+        {
+            foreach (libxml_get_errors() as $error)
+                throw new XMLException($error);
+        }
+        finally
+        {
+            libxml_clear_errors();
+        }
+
         return $root->JSONSerialize();
     }
 }
@@ -130,6 +138,9 @@ class XMLNode implements JSONSerializable
 
     public function JSONSerialize()
     {
+        if (count($this->children) === 0 && !empty($this->content))
+            return $this->content;
+
         $children = array();
         foreach ($this->children as $child)
         {

@@ -52,15 +52,46 @@ class Writer extends AbstractWriter
         $writer->startDocument();
 
         $writer->startElement($this->root_node);
-        $this->formatRecursive($writer, $data);
+        $this->formatRecursive($writer, $data, $this->root_node);
         $writer->endElement();
         
         $writer->endDocument();
         fwrite($file_handle, $writer->outputMemory());
     }
 
-    protected function formatRecursive(\XMLWriter $writer, $data)
+    protected function formatRecursive(\XMLWriter $writer, $data, $parent_name)
     {
+        if (WF::is_sequential_array($data))
+        {
+            $first = true;
+            $remain = count($data);
+            foreach ($data as $idx => $value)
+            {
+                // The first element has already been opened
+                if (!$first)
+                    $writer->startElement($parent_name);
+                else
+                    $first = false;
+
+                if (WF::is_sequential_array($value))
+                {
+                    // wrap to avoid losing structure
+                    $writer->startElement($parent_name); 
+                    $this->formatRecursive($writer, $value, $parent_name);
+                    $writer->endElement();
+                }
+                elseif (is_array($value))
+                    $this->formatRecursive($writer, $value, $parent_name);
+                else
+                    $writer->text(WF::str($value));
+
+                // Don't close the last element
+                if (--$remain > 0)
+                    $writer->endElement();
+            }
+            return;
+        }
+
         foreach ($data as $key => $value)
         {
             if (substr($key, 0, 1) == "_")
@@ -69,9 +100,19 @@ class Writer extends AbstractWriter
             }
             else
             {
+                $is_numeric_key = is_int($key);
+                if ($is_numeric_key)
+                {
+                    $idx = $key;
+                    $key = $parent_name;
+                }
+
                 $writer->startElement($key);
+                if ($is_numeric_key)
+                    $writer->writeAttribute("index", $idx);
+
                 if (is_array($value))
-                    $this->formatRecursive($writer, $value);
+                    $this->formatRecursive($writer, $value, $key);
                 else
                     $writer->text(WF::str($value));
                 $writer->endElement();
