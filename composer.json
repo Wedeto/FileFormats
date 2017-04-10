@@ -9,6 +9,10 @@
         "Wedeto/IO": "0.9.*",
         "php": ">=7.0.0"
     },
+    "suggest": {
+        "ext-xml": "Enables XML Reader and writer",
+        "ext-yaml": "Enables YAML\\Reader and writer"
+    },
     "require-dev": {
         "mikey179/vfsStream": "~1"
     },

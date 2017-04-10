@@ -149,3 +149,7 @@ class XMLNode implements JSONSerializable
         return $children;
     }
 }
+
+// @codeCoverageIgnoreStart
+\Wedeto\Util\Functions::check_extension('xml', XMLReader::class, null);
+// @codeCoverageIgnoreEnd

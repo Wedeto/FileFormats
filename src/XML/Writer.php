@@ -119,5 +119,8 @@ class Writer extends AbstractWriter
             }
         }
     }
-
 }
+
+// @codeCoverageIgnoreStart
+\Wedeto\Util\Functions::check_extension('xml', XMLWriter::class, null);
+// @codeCoverageIgnoreEnd
