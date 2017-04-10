@@ -51,7 +51,7 @@ abstract class AbstractWriter
     public function write($data, $file_handle = null)
     {
         if (!WF::is_array_like($data))
-            throw new \InvalidArgumentException("Data should be array or array-like");
+            throw new \InvalidArgumentException("Data should be array or Traversable");
 
         if ($file_handle === null)
         {

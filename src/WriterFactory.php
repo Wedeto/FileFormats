@@ -26,41 +26,50 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\FileFormats;
 
 use Wedeto\Util\Hook;
+use Wedeto\Util\TypedDictionary;
+use Wedeto\Util\Type;
+
+use Wedeto\IO\File;
 
 class WriterFactory
 {
-    public static function factory(string $file_name)
+    public static function factory($file_name)
     {
-        $ext_pos = strpos($file_name, ".");
-        if ($ext_pos === false)
-            throw new \RuntimeException("File has no extension: $file_name");
-
-        $ext = strtolower(substr($file_name, $ext_pos + 1));
+        if (is_string($file_name))
+            $file = new File($file_name);
+        elseif ($file_name instanceof File)
+            $file = $file_name;
+        else
+            throw new \InvalidArgumentException("Provide a file or file name to WriterFactory");
 
         $result = Hook::execute(
             "Wedeto.FileFormats.CreateWriter",
-            ["writer" => null, "filename" => $file_name, "ext" => $ext]
+            ["writer" => null, "file" => $file]
         );
 
         if ($result['writer'] instanceof AbstractWriter)
             return $result['writer'];
 
-        switch ($ext)
+        $ext = $file->getExt();
+        if (!empty($file))
         {
-            case "csv":
-                return new CSV\Writer;
-            case "ini":
-                return new INI\Writer;
-            case "json":
-                return new JSON\Writer;
-            case "phps":
-                return new PHPS\Writer;
-            case "xml":
-                return new XML\Writer;
-            case "yaml":
-                return new YAML\Writer;
+            switch ($ext)
+            {
+                case "csv":
+                    return new CSV\Writer;
+                case "ini":
+                    return new INI\Writer;
+                case "json":
+                    return new JSON\Writer;
+                case "phps":
+                    return new PHPS\Writer;
+                case "xml":
+                    return new XML\Writer;
+                case "yaml":
+                    return new YAML\Writer;
+            }
         }
-        throw new \DomainException("Unsupported file format: $ext");
+        throw new \DomainException("Could not create writer for file: {$file->getPath()}");
     }
 
     public static function getAvailableWriters()
@@ -71,10 +80,11 @@ class WriterFactory
             'application/json' => JSON\Writer::class,
             'text/x-phpserialized' => PHPS\Writer::class,
             'text/vnd.yaml' => YAML\Writer::class,
-            'application/xml' => XML\Writer::class,
+            'application/xml' => XML\Writer::class
         );
 
-        $result = Hook::execute('Wedeto.FileFormats.GetWriterTypes', ['types' => $writers]);
-        return $result['types'] ?: $writers;
+        $params = new TypedDictionary(['types' => Type::ARRAY], ['types' => $writers]);
+        $result = Hook::execute('Wedeto.FileFormats.GetWriterTypes', $params);
+        return $result['types']->toArray();
     }
 }

@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\FileFormats;
 
 use Wedeto\IO\IOException;
+use Wedeto\IO\File;
 use Wedeto\Util\Functions as WF;
 
 /**
@@ -49,7 +50,7 @@ abstract class AbstractReader
      */
     public function read($param)
     {
-        if ($param instanceof Wedeto\IO\File)
+        if ($param instanceof File)
             return $this->readFile($param->getPath());
 
         if (is_resource($param))

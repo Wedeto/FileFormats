@@ -26,40 +26,46 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\FileFormats;
 
 use Wedeto\Util\Hook;
+use Wedeto\IO\File;
 
 class ReaderFactory
 {
-    public static function factory(string $file_name)
+    public static function factory($file_name)
     {
-        $ext_pos = strpos($file_name, ".");
-        if ($ext_pos === false)
-            throw new \RuntimeException("File has no extension: $file_name");
+        if (is_string($file_name))
+            $file = new File($file_name);
+        elseif ($file_name instanceof File)
+            $file = $file_name;
+        else
+            throw new \InvalidArgumentException("Provide a file or file name to ReaderFactory");
 
-        $ext = strtolower(substr($file_name, $ext_pos + 1));
-
+        $ext = $file->getExt();
         $result = Hook::execute(
             "Wedeto.FileFormats.CreateReader", 
-            ['reader' => null, 'filename' => $file_name, 'ext' => $ext]
+            ['reader' => null, 'file' => $file]
         );
 
         if ($result['reader'] instanceof AbstractReader)
             return $result['reader'];
 
-        switch ($ext)
+        if (!empty($ext))
         {
-            case "csv":
-                return new CSV\Reader;
-            case "ini";
-                return new INI\Reader;
-            case "json":
-                return new JSON\Reader;
-            case "phps":
-                return new PHPS\Reader;
-            case "xml":
-                return new XML\Reader;
-            case "yaml":
-                return new YAML\Reader;
+            switch ($ext)
+            {
+                case "csv":
+                    return new CSV\Reader;
+                case "ini";
+                    return new INI\Reader;
+                case "json":
+                    return new JSON\Reader;
+                case "phps":
+                    return new PHPS\Reader;
+                case "xml":
+                    return new XML\Reader;
+                case "yaml":
+                    return new YAML\Reader;
+            }
         }
-        throw new \DomainException("Unsupported file format: $ext");
+        throw new \DomainException("Could not create reader for file: {$file->getPath()}");
     }
 }
