@@ -97,7 +97,7 @@ abstract class AbstractReader
      * Read data from a formatted string
      * @param string $data The formatted / encoded data to be read
      * @return array The read data
-     * @throws WASP\IO\IOEXception On parse errors
+     * @throws Wedeto\IO\IOEXception On parse errors
      */
     abstract public function readString(string $data);
 }
