@@ -38,7 +38,7 @@ use Wedeto\Util\Functions as WF;
  * The default implementation just reads the entire string and passes
  * it to readString.
  */
-abstract class AbstractReader
+abstract class AbstractReader implements Reader
 {
     /**
      * Read provided data. The method auto-detects if it is a file,

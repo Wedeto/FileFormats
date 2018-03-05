@@ -27,15 +27,26 @@ namespace Wedeto\FileFormats;
 
 use Wedeto\Util\Hook;
 use Wedeto\IO\File;
+use Wedeto\Util\DI\DI;
+use Wedeto\Util\DI\Factory;
+use Wedeto\Util\DI\Injector;
 
-class ReaderFactory
+class ReaderFactory implements Factory
 {
-    public static function factory($file_name)
+    public function produce(string $class, array $args, string $selector, Injector $injector)
     {
-        if (is_string($file_name))
-            $file = new File($file_name);
-        elseif ($file_name instanceof File)
-            $file = $file_name;
+        if (!isset($args['filename']))
+            throw new \InvalidArgumentException('Missing argument filename');
+
+        return static::factory($args['filename']);
+    }
+
+    public static function factory($filename)
+    {
+        if (is_string($filename))
+            $file = new File($filename);
+        elseif ($filename instanceof File)
+            $file = $filename;
         else
             throw new \InvalidArgumentException("Provide a file or file name to ReaderFactory");
 
@@ -69,3 +80,6 @@ class ReaderFactory
         throw new \DomainException("Could not create reader for file: {$file->getPath()}");
     }
 }
+
+// Register factory in DI to produce writers
+DI::getInjector()->registerFactory(Reader::class, new ReaderFactory());

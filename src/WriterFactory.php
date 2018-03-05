@@ -30,9 +30,20 @@ use Wedeto\Util\TypedDictionary;
 use Wedeto\Util\Type;
 
 use Wedeto\IO\File;
+use Wedeto\Util\DI\DI;
+use Wedeto\Util\DI\Factory;
+use Wedeto\Util\DI\Injector;
 
-class WriterFactory
+class WriterFactory implements Factory
 {
+    public function produce(string $class, array $args, string $selector, Injector $injector)
+    {
+        if (!isset($args['filename']))
+            throw new \InvalidArgumentException('Missing argument filename');
+
+        return static::factory($args['filename']);
+    }
+
     public static function factory($file_name)
     {
         if (is_string($file_name))
@@ -88,3 +99,6 @@ class WriterFactory
         return $result['types']->toArray();
     }
 }
+
+// Register factory in DI to produce writers
+DI::getInjector()->registerFactory(Writer::class, new WriterFactory());

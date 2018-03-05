@@ -28,7 +28,7 @@ namespace Wedeto\FileFormats;
 use Wedeto\Util\Functions as WF;
 use Wedeto\Util\Hook;
 
-abstract class AbstractWriter
+abstract class AbstractWriter implements Writer
 {
     protected $pretty_print;
 
