@@ -148,4 +148,24 @@ XML;
 XML;
         $actual = file_get_contents($file);
     }
+
+    public function testXMLWriterWriteAttributesAndContent()
+    {
+        $cfg = array('arr1' => ['foo' => ['_bar' => 'baz', '_content_' => 'foobar']]);
+        $file = $this->dir . '/test.xml';
+
+        $fh = fopen($file, "w");
+        $writer = new Writer();
+        $writer->setRootNode('header');
+        $this->assertEquals('header', $writer->getRootNode());
+        $writer->write($cfg, $fh);
+        fclose($fh);
+
+        $expected = <<<XML
+<?xml version="1.0"?>
+<header><foo bar="baz">foobar</foo></header>
+
+XML;
+        $actual = file_get_contents($file);
+    }
 }

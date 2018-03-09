@@ -146,6 +146,15 @@ class XMLNode implements JSONSerializable
             if (count($children[$key]) === 1)
                 $children[$key] = $children[$key][0];
         }
+
+        if (!empty($this->content))
+        {
+            if (count($children))
+                $children['_content_'] = $this->content;
+            else
+                $children = $this->content;
+        }
+
         return $children;
     }
 }

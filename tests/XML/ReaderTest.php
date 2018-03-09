@@ -138,4 +138,15 @@ XML;
 
         $this->assertEquals($expected, $actual);
     }
+
+    public function testXMLReaderFromString()
+    {
+        $xml = '<?xml version="1.0"?><header><foo bar="baz">foobar</foo></header>';
+
+        $reader = new Reader;
+        $actual = $reader->readString($xml);
+
+        $this->assertEquals('baz', $actual['foo']['_bar']);
+        $this->assertEquals('foobar', $actual['foo']['_content_']);
+    }
 }

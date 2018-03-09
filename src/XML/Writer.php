@@ -112,7 +112,14 @@ class Writer extends AbstractWriter
                     $writer->writeAttribute("index", $idx);
 
                 if (is_array($value))
+                {
+                    if (isset($value['_content_']))
+                    {
+                        $writer->text(WF::str($value['_content_']));
+                        unset($value['_content_']);
+                    }
                     $this->formatRecursive($writer, $value, $key);
+                }
                 else
                     $writer->text(WF::str($value));
                 $writer->endElement();
