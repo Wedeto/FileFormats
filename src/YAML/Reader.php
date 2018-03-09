@@ -3,7 +3,7 @@
 This is part of Wedeto, the WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
-Copyright 2017, Egbert van der Wal
+Copyright 2017-2018, Egbert van der Wal
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -32,8 +32,17 @@ use Wedeto\Util\Functions as WF;
 use Wedeto\Util\ErrorInterceptor;
 use Wedeto\IO\IOException;
 
+/**
+ * Parse YAML files using the PHP Yaml extension
+ */
 class Reader extends AbstractReader
 {
+    /**
+     * Read YAML from a file
+     * 
+     * @param string filename The file to read from
+     * @return array The parsed data
+     */
     public function readFile(string $file_name)
     {
         // yaml_read_file does not support stream wrappers
@@ -43,6 +52,12 @@ class Reader extends AbstractReader
         return $this->readFileHandle($file_handle);
     }
 
+    /**
+     * Read YAML from an open resource
+     *
+     * @param resource $file_handle The resource to read from
+     * @return array The parsed data
+     */
     public function readFileHandle($file_handle)
     {
         if (!is_resource($file_handle))
@@ -55,6 +70,12 @@ class Reader extends AbstractReader
         return $this->readString($contents);
     }
 
+    /**
+     * Read YAML from a string
+     *
+     * @param string $data The YAML data
+     * @return array The parsed data
+     */
     public function readString(string $data)
     {
         $interceptor = new ErrorInterceptor(function ($data) {

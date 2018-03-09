@@ -3,7 +3,7 @@
 This is part of Wedeto, the WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
-Copyright 2017, Egbert van der Wal
+Copyright 2017-2018, Egbert van der Wal
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -29,6 +29,7 @@ use Iterator;
 
 use Wedeto\FileFormats\AbstractReader;
 use Wedeto\IO\IOException;
+use Wedeto\Util\Encoding;
 
 /**
  * Read CSV files. This provides a direct CSV reader that converts a CSV file
@@ -42,6 +43,7 @@ class Reader extends AbstractReader implements Iterator
     protected $file_handle;
     protected $line_number;
     protected $current_line = null;
+    protected $has_bom = null;
 
     protected $delimiter = ',';
     protected $enclosure = '"';
@@ -50,56 +52,102 @@ class Reader extends AbstractReader implements Iterator
 
     protected $header = null;
 
+    /**
+     * Create the CSV Reader from a file name
+     *
+     * @param $file_name The name of a file to open
+     */
     public function __construct($file_name = null)
     {
         if ($file_name !== null)
             $this->file_handle = fopen($file_name, "r");
     }
 
+    /**
+     * Set the delimiter character
+     *
+     * @param string $delimiter The delimiter character
+     * @return $this Provides fluent interface
+     */
     public function setDelimiter(string $delimiter)
     {
         $this->delimiter = $delimiter;
         return $this;
     }
 
+    /**
+     * @return string The delimiter character, usually ,
+     */
     public function getDelimiter()
     {
         return $this->delimiter;
     }
 
+    /**
+     * Set the enclosure / quoting character
+     *
+     * @param string $enclosure The enclose character
+     * @return $this Provides fluent interface
+     */
     public function setEnclosure(string $enclosure)
     {
         $this->enclosure = $enclosure;
         return $this;
     }
 
+    /**
+     * @return string The enclosure character, quotes.
+     */
     public function getEnclosure()
     {
         return $this->enclosure;
     }
 
+    /**
+     * Set the escape character
+     *
+     * @param string $escape The escape character
+     * @return $this Provides fluent interface
+     */
     public function setEscapeChar(string $escape)
     {
         $this->escape_char = $escape;
         return $this;
     }
 
+    /**
+     * @return string The escape chararacter
+     */
     public function getEscapeChar()
     {
         return $this->escape_char;
     }
 
+    /**
+     * Set if the first row should be read as header
+     * @param bool $read_header True to read the first row as header
+     * @return $this Provides fluent interface
+     */
     public function setReadHeader(bool $read_header)
     {
         $this->read_header = $read_header;
         return $this;
     }
 
+    /**
+     * @return bool Whether the first row will be read as header
+     */
     public function getReadHeader()
     {
         return $this->read_header;
     }
-
+    
+    /**
+     * Read CSV data from a file
+     *
+     * @param string $file_name The name of the file to read
+     * @return array The parsed data
+     */
     public function readFile(string $file_name)
     {
         $data = array();
@@ -111,6 +159,12 @@ class Reader extends AbstractReader implements Iterator
         return $data;
     }
 
+    /**
+     * Read CSV from a stream.
+     *
+     * @param resource $file_handle The stream to read CSV from
+     * @return array The parsed data
+     */
     public function readFileHandle($file_handle)
     {
         if (!is_resource($file_handle))
@@ -125,9 +179,15 @@ class Reader extends AbstractReader implements Iterator
         return $data;
     }
 
+    /**
+     * Read CSV from a string. This will write the data to a temporary stream
+     *
+     * @param string $data The data to read as CSV
+     * @return array The parsed data
+     */
     public function readString(string $data)
     {
-        $this->file_handle = fopen('php://memory', 'rw');
+        $this->file_handle = fopen('php://temp', 'rw');
         fwrite($this->file_handle, $data);
 
         $data = array();
@@ -137,6 +197,9 @@ class Reader extends AbstractReader implements Iterator
         return $data;
     }
 
+    /**
+     * Rewind the file handle to the start
+     */
     public function rewind()
     {
         rewind($this->file_handle);
@@ -145,6 +208,9 @@ class Reader extends AbstractReader implements Iterator
         $this->header = null;
     }
 
+    /**
+     * @return array The current line of CSV
+     */
     public function current()
     {
         if ($this->current_line === false)
@@ -156,17 +222,26 @@ class Reader extends AbstractReader implements Iterator
         return $this->current_line;
     }
 
+    /**
+     * @return int The line number of the current line
+     */
     public function key()
     {
         return $this->line_number;
     }
 
+    /**
+     * Get ready to the next line
+     */
     public function next()
     {
         $this->current_line = null;
         ++$this->line_number;
     }
 
+    /**
+     * @return bool True if the iterator is valid - when a valid line was read, false if not.
+     */
     public function valid()
     {
         if ($this->current_line === null)
@@ -174,9 +249,36 @@ class Reader extends AbstractReader implements Iterator
 
         return $this->current_line !== false;
     }
+
+    /**
+     * @return bool True when a BOM was read, false if not
+     */
+    public function hasBOM()
+    {
+        return $this->has_bom;
+    }
     
+    /**
+     * Read a line from the CSV Stream, available from current() afterwards.
+     */
     protected function readLine()
     {
+        if ($this->line_number === 0)
+        {
+            $st = ftell($this->file_handle);
+            if ($st === 0)
+            { 
+                // Attempt to read a Byte Order Mark only if this file handle is at the start of the file
+                $utf8_bom = Encoding::getBOM('UTF8');
+                $maybe_bom = fread($this->file_handle, 3);
+                $this->has_bom = $utf8_bom === $maybe_bom;
+
+                // Rewind if the first three characters are not the UTF8 BOM
+                if (!$this->has_bom)
+                    fseek($this->file_handle, 0);
+            }
+        }
+
         if ($this->read_header && empty($this->line_number) && $this->header === null)
             $this->header = fgetcsv($this->file_handle, 0, $this->delimiter, $this->enclosure, $this->escape_char);
 

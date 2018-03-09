@@ -28,8 +28,14 @@ namespace Wedeto\FileFormats\JSON;
 use Wedeto\IO\IOException;
 use Wedeto\FileFormats\AbstractReader;
 
+/**
+ * Parse JSON data
+ */
 class Reader extends AbstractReader
 {
+    /** 
+     * Read a JSON string - use the built-in json_decode functionality
+     */
     public function readString(string $data)
     {
         $json = json_decode($data, true);

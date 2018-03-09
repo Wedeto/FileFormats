@@ -61,7 +61,7 @@ class WriterFactory implements Factory
         if ($result['writer'] instanceof AbstractWriter)
             return $result['writer'];
 
-        $ext = $file->getExt();
+        $ext = $file->getExtension();
         if (!empty($file))
         {
             switch ($ext)
@@ -80,7 +80,7 @@ class WriterFactory implements Factory
                     return new YAML\Writer;
             }
         }
-        throw new \DomainException("Could not create writer for file: {$file->getPath()}");
+        throw new \DomainException("Could not create writer for file: {$file->getFullPath()}");
     }
 
     public static function getAvailableWriters()

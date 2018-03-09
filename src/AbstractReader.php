@@ -28,6 +28,7 @@ namespace Wedeto\FileFormats;
 use Wedeto\IO\IOException;
 use Wedeto\IO\File;
 use Wedeto\Util\Functions as WF;
+use Wedeto\Util\Encoding;
 
 /**
  * Define the Data Reader interface.
@@ -51,7 +52,7 @@ abstract class AbstractReader implements Reader
     public function read($param)
     {
         if ($param instanceof File)
-            return $this->readFile($param->getPath());
+            return $this->readFile($param->getFullPath());
 
         if (is_resource($param))
             return $this->readFileHandle($param);
@@ -77,6 +78,7 @@ abstract class AbstractReader implements Reader
         if ($contents === false)
             throw new IOException("Failed to read file contents");
 
+        $contents = Encoding::removeBOM($contents);
         return $this->readString(file_get_contents($file_name));
     }
 
@@ -90,7 +92,10 @@ abstract class AbstractReader implements Reader
         if (!is_resource($file_handle))
             throw new \InvalidArgumentException("No file handle was provided");
 
-        return $this->readString(stream_get_contents($file_handle));
+        $contents = stream_get_contents($file_handle);
+        $contents = Encoding::removeBOM($contents);
+
+        return $this->readString($contents);
     }
 
     /**

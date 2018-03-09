@@ -50,7 +50,7 @@ class ReaderFactory implements Factory
         else
             throw new \InvalidArgumentException("Provide a file or file name to ReaderFactory");
 
-        $ext = $file->getExt();
+        $ext = $file->getExtension();
         $result = Hook::execute(
             "Wedeto.FileFormats.CreateReader", 
             ['reader' => null, 'file' => $file]
@@ -77,7 +77,7 @@ class ReaderFactory implements Factory
                     return new YAML\Reader;
             }
         }
-        throw new \DomainException("Could not create reader for file: {$file->getPath()}");
+        throw new \DomainException("Could not create reader for file: {$file->getFullPath()}");
     }
 }
 

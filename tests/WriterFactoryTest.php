@@ -112,7 +112,7 @@ class WriterFactoryTest extends TestCase
 
     public function writerFactory(Dictionary $dict)
     {
-        if ($dict['file']->getExt() === 'test')
+        if ($dict['file']->getExtension() === 'test')
         {
             $mock = $this->prophesize(AbstractWriter::class);
             $dict['writer'] = $mock->reveal();

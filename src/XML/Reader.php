@@ -33,6 +33,12 @@ use Wedeto\IO\IOException;
 
 class Reader extends AbstractReader
 {
+    /**
+     * Read a XML file into an array
+     *
+     * @param string $filename The file to read
+     * @return array The array representation of the XML Data
+     */
     public function readFile(string $file_name)
     {
         $reader = new XMLReader;
@@ -44,6 +50,12 @@ class Reader extends AbstractReader
         return $data;
     }
 
+    /**
+     * Read XML Data from a string
+     *
+     * @param string $data The data to read
+     * @return array the array representation of the XML data
+     */
     public function readString(string $data)
     {
         $reader = new XMLReader;
@@ -55,10 +67,31 @@ class Reader extends AbstractReader
         return $contents;
     }
 
+    /**
+     * Convert the XMLReader to an array. Doing this will remove support
+     * for node attributes. You can access them under their node name,
+     * as _attributename. When attributes are present, a nodes content will
+     * be stored as _content_.
+     * 
+     * @param XMLReader The reader reading the XML
+     * @return array An array represeting the XML structure.
+     */
     public function toArray(XMLReader $reader)
     {
-        $data = array();
+        $root = $this->parseTree($reader);
+        return $root->JSONSerialize();
+    }
 
+    /**
+     * Parse the XML into an array. This will add all nodes and attributes to
+     * a tree of XML nodes. This is only basic XML flattening, for full-blown
+     * XML support be sure to use a more fully featured solution like SimpleXML
+     * 
+     * @param XMLReader $reader The reader reading the XML
+     * @return XMLNode The root node
+     */
+    public function parseTree(XMLReader $reader)
+    {
         libxml_use_internal_errors(true);
         $root = new XMLNode;
         $cur = null;
@@ -85,13 +118,12 @@ class Reader extends AbstractReader
 
                 if ($reader->hasAttributes)
                 {
-                    $attributes = array();
                     while ($reader->moveToNextAttribute())
                     {
                         $node = new XMLNode;
-                        $node->name = "_" . $reader->name;
+                        $node->name = $reader->name;
                         $node->content = $reader->value;
-                        $cur->children[] = $node;
+                        $cur->attributes[] = $node;
                     }
                 }
 
@@ -116,28 +148,44 @@ class Reader extends AbstractReader
             libxml_clear_errors();
         }
 
-        return $root->JSONSerialize();
+        return $root;
     }
 }
 
+/**
+ * XMLNode is a very simple representation of an XML node,
+ * storing its children, attributes and content.
+ * Its JSONSerializable flattens it into an array.
+ */
 class XMLNode implements JSONSerializable
 {
     public $name = null;
     public $parent = null;
-    public $children = array();
+    public $children = [];
+    public $attributes = [];
     public $content = null;
 
     public function JSONSerialize()
     {
-        if (count($this->children) === 0 && !empty($this->content))
+        if (count($this->children) === 0 && count($this->attributes) === 0 && !empty($this->content))
             return $this->content;
 
-        $children = array();
+        $children = [];
         foreach ($this->children as $child)
         {
             if (!isset($children[$child->name]))
-                $children[$child->name] = array();
+                $children[$child->name] = [];
             $children[$child->name][] = $child->JSONSerialize();
+        }
+        
+        // Attributes cannot be represented in an array directly, so
+        // they are represented as children prefix with a _
+        foreach ($this->attributes as $child)
+        {
+            $name = '_' . $child->name;
+            if (!isset($children[$name]))
+                $children[$name] = [];
+            $children[$name][] = $child->JSONSerialize();
         }
 
         $keys = array_keys($children);

@@ -33,6 +33,7 @@ use org\bovigo\vfs\vfsStreamDirectory;
 
 use Wedeto\IO\Path;
 use Wedeto\IO\IOException;
+use Wedeto\Util\Encoding;
 
 /**
  * @covers Wedeto\FileFormats\CSV\Writer
@@ -89,9 +90,9 @@ CSV;
 
         $this->assertEquals($expected, $actual);
 
-        $this->assertEquals(true, $writer->getPrintHeader());
-        $this->assertInstanceOf(Writer::class, $writer->setPrintHeader(false));
-        $this->assertEquals(false, $writer->getPrintHeader());
+        $this->assertEquals(true, $writer->getWriteHeader());
+        $this->assertInstanceOf(Writer::class, $writer->setWriteHeader(false));
+        $this->assertEquals(false, $writer->getWriteHeader());
         $writer->write($data, $this->file);
 
         $actual = file_get_contents($this->file);
@@ -102,6 +103,30 @@ CSV;
 7,foobaz,"test last"
 
 CSV;
+    }
+
+    public function testWriteCSVWithBOM()
+    {
+        $data = [
+            ['foo', 'bar', 'baz'],
+            ['foobar', 'foobaz', 'barbaz']
+        ];
+
+        $writer = new Writer;
+        $writer->setWriteBOM(true);
+        $writer->setWriteHeader(false);
+
+        $writer->write($data, $this->file);
+
+        $actual = file_get_contents($this->file);
+        $actual_bom = substr($actual, 0, 3);
+
+        $this->assertEquals(Encoding::getBOM('UTF8'), $actual_bom);
+
+        $rest = substr($actual, 3);
+        $expected = "foo,bar,baz\nfoobar,foobaz,barbaz\n";
+
+        $this->assertEquals($expected, $rest, "Rest of data should be written correctly");
     }
 
 }

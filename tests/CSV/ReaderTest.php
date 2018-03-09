@@ -240,4 +240,25 @@ EOT;
         $this->assertInstanceOf(Reader::class, $reader->setEscapeChar('^'));
         $this->assertEquals('^', $reader->getEscapeChar());
     }
+
+    public function testReadingBOM()
+    {
+        $csv = chr(0xEF) . chr(0xBB) . chr(0xBF) . "foo,bar,baz";
+
+        file_put_contents($this->file, $csv);
+
+        $reader = new Reader($this->file);
+        $reader->setReadHeader(false);
+
+        $reader->rewind();
+        $data = $reader->current();
+
+        $this->assertTrue($reader->hasBOM(), "The BOM should be recognized");
+
+        $this->assertEquals(3, count($data));
+        $this->assertEquals('foo', $data[0], "BOM should not be read as characters");
+        $this->assertEquals(3, strlen($data[0]), "BOM should not be read as characters");
+        $this->assertEquals('bar', $data[1]);
+        $this->assertEquals('baz', $data[2]);
+    }
 }

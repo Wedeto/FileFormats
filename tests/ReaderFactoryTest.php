@@ -121,7 +121,7 @@ class ReaderFactoryTest extends TestCase
 
     public function readerFactory(Dictionary $dict)
     {
-        if ($dict['file']->getExt() === 'test')
+        if ($dict['file']->getExtension() === 'test')
         {
             $mock = $this->prophesize(AbstractReader::class);
             $dict['reader'] = $mock->reveal();
