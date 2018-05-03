@@ -86,12 +86,12 @@ class WriterFactory implements Factory
     public static function getAvailableWriters()
     {
         $writers = array(
-            'text/csv' => CSV\Writer::class,
-            'text/ini' => INI\Writer::class,
             'application/json' => JSON\Writer::class,
+            'application/xml' => XML\Writer::class,
             'text/x-phpserialized' => PHPS\Writer::class,
             'text/vnd.yaml' => YAML\Writer::class,
-            'application/xml' => XML\Writer::class
+            'text/csv' => CSV\Writer::class,
+            'text/ini' => INI\Writer::class
         );
 
         $params = new TypedDictionary(['types' => Type::ARRAY], ['types' => $writers]);
