@@ -27,7 +27,7 @@ namespace Wedeto\FileFormats;
 
 use Wedeto\Util\Hook;
 use Wedeto\Util\TypedDictionary;
-use Wedeto\Util\Type;
+use Wedeto\Util\Validation\Type;
 
 use Wedeto\IO\File;
 use Wedeto\Util\DI\DI;
