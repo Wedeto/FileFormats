@@ -5,8 +5,8 @@
     "homepage": "https://wedeto.com/",
     "type": "library",
     "require": {
-        "Wedeto/Util": ">=0.9.15",
-        "Wedeto/IO": ">=0.9.0",
+        "Wedeto/Util": "~1.0.0-beta1",
+        "Wedeto/IO": "~1.0.0-beta1",
         "php": ">=7.0.0"
     },
     "suggest": {
