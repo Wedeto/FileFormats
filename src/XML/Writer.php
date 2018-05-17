@@ -75,7 +75,6 @@ class Writer extends AbstractWriter
 
                 if (WF::is_sequential_array($value))
                 {
-                    $log->error("Seq array: {0}", [$value]);
                     // wrap to avoid losing structure
                     $writer->startElement($parent_name); 
                     $this->formatRecursive($writer, $value, $parent_name);
